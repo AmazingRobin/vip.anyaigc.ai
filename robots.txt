@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vip.anyaigc.ai/sitemap.xml

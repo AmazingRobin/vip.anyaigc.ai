@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0817">
+<meta name="color-scheme" content="dark">
+<title>AI 会员 · AnyAIGC·AI</title>
+<style>
+/* ============ 设计变量 ============ */
+:root{
+  --bg:#0a0817; --bg-2:#130f2c;
+  --ink:#f6f4ff; --ink-2:rgba(236,232,255,.74); --ink-3:rgba(236,232,255,.5);
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.16);
+  --card:rgba(255,255,255,.045); --card-2:rgba(255,255,255,.08);
+  --glass:rgba(16,12,36,.72); --sheet:#14102b;
+  --violet:#8b5cf6; --pink:#ec4899; --gold:#fbbf24; --mint:#34d399;
+  --cta-1:#ffd56a; --cta-2:#ff9b1f; --cta-edge:#b25c00; --cta-ink:#3b1c00;
+  --radius:22px;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --ease-back:cubic-bezier(.2,.9,.3,1.2);
+}
+*{box-sizing:border-box}
+
+/* ============ 全局滚动条：细条、半透明滑块、透明轨道 ============ */
+:root{--sb-thumb:rgba(255,255,255,.18);--sb-thumb-hover:rgba(255,255,255,.32)}
+/* 标准属性：Firefox、Chrome 121+ */
+*{scrollbar-width:thin;scrollbar-color:var(--sb-thumb) transparent}
+/* WebKit 旧版本与 Safari 兜底 */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--sb-thumb);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--sb-thumb-hover)}
+::-webkit-scrollbar-button{display:none}
+/* 始终预留滚动条槽位：弹窗锁定滚动时滚动条消失，页面也不会横向跳动 */
+/* color-scheme:dark 让浏览器按深色主题绘制根滚动条；
+   html 自带深色底，透明轨道和预留槽位露出来的就是页面底色而不是白色 */
+html{scroll-behavior:smooth;scrollbar-gutter:stable;color-scheme:dark;background-color:var(--bg)}
+body{
+  margin:0; min-height:100vh; color:var(--ink);
+  font:14px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(1000px 600px at 88% -12%, rgba(139,92,246,.24), transparent 60%),
+    radial-gradient(860px 540px at -12% 22%, rgba(236,72,153,.13), transparent 62%),
+    linear-gradient(180deg,var(--bg),var(--bg-2));
+  background-attachment:fixed;
+}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid #c4b5fd;outline-offset:3px;border-radius:10px}
+.icon{width:18px;height:18px;flex:none}
+/* 锁在 html 上：配合 scrollbar-gutter 保留滚动条槽位，开关弹窗时页面不跳 */
+html.locked{overflow:hidden}
+
+/* ============ 背景极光 ============ */
+.aurora{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.aurora i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;animation:drift 22s ease-in-out infinite alternate}
+.aurora i:nth-child(1){width:520px;height:520px;left:-140px;top:30%;background:#7c3aed}
+.aurora i:nth-child(2){width:440px;height:440px;right:-120px;top:-80px;background:#db2777;opacity:.32;animation-duration:26s}
+.aurora i:nth-child(3){width:380px;height:380px;left:45%;bottom:-160px;background:#0ea5e9;opacity:.22;animation-duration:30s}
+@keyframes drift{to{transform:translate3d(60px,-40px,0) scale(1.12)}}
+
+/* ============ 顶栏 ============ */
+.top{
+  position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;
+  padding:12px max(20px,calc((100vw - 1180px)/2));
+  border-bottom:1px solid transparent;transition:background .25s,border-color .25s,box-shadow .25s;
+}
+.top.raised{background:var(--glass);border-color:var(--line);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 10px 30px -20px rgba(0,0,0,.6)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px;letter-spacing:.01em}
+.brand-mark{
+  width:100px;height:34px;border-radius:11px;display:grid;place-items:center;
+  background:conic-gradient(from 200deg,#8b5cf6,#ec4899,#f59e0b,#8b5cf6);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 6px 16px -6px rgba(139,92,246,.8);
+  font-weight:900;font-size:15px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);
+}
+.brand b span{color:#c4b5fd}
+.tag{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;
+  font-size:12px;font-weight:800;color:#fff;
+  background:linear-gradient(90deg,#7c3aed,#db2777);box-shadow:0 4px 14px -6px #db2777;
+}
+.tag::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;opacity:.85}
+.top-actions{margin-left:auto}
+.btn-violet{
+  display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 18px;border-radius:13px;
+  font-weight:800;color:#fff;background:linear-gradient(180deg,#a78bfa,#7c3aed);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 3px 0 #4c1d95,0 12px 22px -12px #7c3aed;
+  transition:transform .14s var(--ease-out),filter .2s,box-shadow .14s;
+}
+.btn-violet:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.btn-violet:active{transform:translateY(2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 1px 0 #4c1d95}
+
+/* ============ 通用按钮 ============ */
+.cta{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 22px;border-radius:15px;
+  font-size:15px;font-weight:900;letter-spacing:.02em;white-space:nowrap;color:var(--cta-ink);
+  background:linear-gradient(180deg,var(--cta-1),var(--cta-2));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 4px 0 var(--cta-edge),0 14px 26px -10px rgba(255,155,31,.65);
+  transition:transform .14s var(--ease-out),box-shadow .14s,filter .2s;
+}
+.cta:hover{filter:brightness(1.05) saturate(1.08);transform:translateY(-1px)}
+.cta:active{transform:translateY(3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 1px 0 var(--cta-edge),0 6px 14px -8px rgba(255,155,31,.6)}
+.ghost{
+  display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 18px;border-radius:15px;
+  font-weight:700;background:var(--card);border:1px solid var(--line-2);transition:background .2s,border-color .2s;
+}
+.ghost:hover{background:var(--card-2);border-color:rgba(255,255,255,.26)}
+
+/* ============ Hero ============ */
+main{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 20px}
+.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:36px;align-items:center;padding:44px 0 30px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:700;
+  color:#ada9c0;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);
+  animation:rise .6s var(--ease-out) both;
+}
+.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 0 rgba(52,211,153,.7);animation:pulse 2s ease-out infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 8px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+.hero h1{margin:18px 0 26px;font-size:clamp(34px,4.6vw,54px);line-height:1.18;font-weight:900;letter-spacing:-.01em}
+.hero h1 .line{display:block;animation:rise .7s var(--ease-out) both}
+.hero h1 .line:nth-child(2){animation-delay:.08s}
+.hl{position:relative;display:inline-block;background:linear-gradient(90deg,#a78bfa,#f472b6 55%,#fbbf24);-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% 100%;animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:-200% 0}}
+.hl svg{position:absolute;left:0;right:0;bottom:-12px;width:100%;height:14px;overflow:visible}
+.hl svg path{fill:none;stroke:url(#ul);stroke-width:4;stroke-linecap:round;stroke-dasharray:420;stroke-dashoffset:420;animation:draw 1.2s cubic-bezier(.6,0,.2,1) .5s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* 标题旁的奶茶杯：外层负责入场，内层 svg 负责循环摇摆，避免两个 transform 动画互相覆盖 */
+.sh-boba-cup{display:inline-block;width:.86em;height:1.12em;margin-left:.14em;vertical-align:-.1em;animation:cupIn .8s var(--ease-back) .7s both;cursor:default}
+.sh-boba-cup svg{display:block;width:100%;height:100%;overflow:visible;transform-origin:50% 92%;animation:cupBob 3.4s ease-in-out 1.5s infinite;filter:drop-shadow(0 8px 10px rgba(0,0,0,.35))}
+.sh-boba-cup:hover svg{animation:cupShake .6s ease-in-out}
+.sh-boba-cup .straw{transform-box:fill-box;transform-origin:50% 100%;animation:strawSway 3.4s ease-in-out 1.5s infinite}
+.sh-boba-cup .pearl{transform-box:fill-box;animation:pearlFloat 2.6s ease-in-out infinite;animation-delay:var(--d)}
+.sh-boba-cup .eye{transform-box:fill-box;transform-origin:50% 50%;animation:blink 4.2s ease-in-out 2s infinite}
+.sh-boba-cup .bubble{opacity:0;animation:bubbleUp 3s ease-in infinite;animation-delay:var(--d)}
+@keyframes cupIn{from{opacity:0;transform:translateY(18px) rotate(-18deg) scale(.6)}}
+@keyframes cupBob{0%,100%{transform:rotate(0) translateY(0)}25%{transform:rotate(-6deg) translateY(-3px)}50%{transform:rotate(0) translateY(0)}75%{transform:rotate(5deg) translateY(-2px)}}
+@keyframes cupShake{20%{transform:rotate(-12deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-7deg)}80%{transform:rotate(4deg)}}
+@keyframes strawSway{0%,100%{transform:rotate(0)}30%{transform:rotate(-5deg)}70%{transform:rotate(4deg)}}
+@keyframes pearlFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes blink{0%,44%,50%,100%{transform:scaleY(1)}47%{transform:scaleY(.1)}}
+@keyframes bubbleUp{0%{opacity:0;transform:translateY(0)}20%{opacity:.9}100%{opacity:0;transform:translateY(-26px)}}
+.lead{margin:0 0 24px;max-width:520px;color:var(--ink-2);font-size:16px;animation:rise .7s var(--ease-out) .16s both}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;animation:rise .7s var(--ease-out) .22s both}
+.promises{list-style:none;margin:26px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.promises li{
+  display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--line);
+  animation:rise .6s var(--ease-out) both;animation-delay:calc(.3s + var(--i) * .07s);
+}
+.promises .pi{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex:none;color:#fff;background:var(--g);box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.promises b{display:block;font-size:14px}
+.promises small{display:block;color:var(--ink-3);font-size:12px;line-height:1.5}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}}
+
+/* Hero 舞台：三张悬浮卡 */
+.stage{--px:0deg;--py:0deg;position:relative;height:430px;perspective:1200px}
+.rig{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateY(var(--px)) rotateX(var(--py));transition:transform .5s var(--ease-out)}
+.floor{position:absolute;left:12%;right:12%;bottom:22px;height:60px;border-radius:50%;background:radial-gradient(closest-side,rgba(139,92,246,.45),transparent);filter:blur(10px);animation:breathe 5s ease-in-out infinite}
+@keyframes breathe{50%{opacity:.55;transform:scaleX(.9)}}
+/* .holo 只负责摆放（位置、倾斜、景深、入场）；
+   卡面 .wrap 承载背景和全部内容，漂浮时背景与文字作为一个整体移动 */
+.holo{
+  position:absolute;width:270px;height:172px;text-align:left;color:#fff;
+  transition:filter .2s;animation:pop .9s var(--ease-back) both;
+}
+.holo:hover{filter:brightness(1.08)}
+.holo .wrap{
+  position:absolute;inset:0;display:block;padding:18px;border-radius:20px;overflow:hidden;
+  background:linear-gradient(140deg,var(--a1),var(--a2));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 30px 50px -24px rgba(0,0,0,.75);
+  animation:float 6s ease-in-out infinite;
+}
+.holo.h0{left:4%;top:60px;transform:rotate(-9deg) translateZ(-40px);animation-delay:.15s}
+.holo.h1{right:2%;top:20px;transform:rotate(7deg) translateZ(-10px);animation-delay:.3s}
+.holo.h2{left:18%;top:176px;transform:rotate(-3deg) translateZ(50px);animation-delay:.45s}
+.holo.h1 .wrap{animation-delay:-2s}.holo.h2 .wrap{animation-delay:-4s}
+@keyframes pop{from{opacity:0;translate:0 40px;scale:.9}}
+@keyframes float{50%{transform:translateY(-10px)}}
+.dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.18) 1px,transparent 1.2px);background-size:12px 12px;mask-image:linear-gradient(120deg,transparent 30%,#000);pointer-events:none}
+.holo-price{position:absolute;right:16px;top:16px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.25);font-size:12px;font-weight:700}
+.holo-price b{font-size:18px;margin-right:2px}
+.holo strong{position:absolute;left:18px;bottom:34px;font-size:22px;font-weight:900;text-shadow:0 2px 10px rgba(0,0,0,.25)}
+.holo small{position:absolute;left:18px;bottom:14px;opacity:.8;font-size:12px}
+/* 芯片：金属渐变底 + SVG 触点纹路 + 斜向反光 */
+.chip{
+  position:relative;display:inline-block;width:38px;height:28px;margin-left:12px;vertical-align:middle;border-radius:7px;overflow:hidden;
+  background:linear-gradient(135deg,#fff1b8 0%,#f3cf6a 28%,#c9971f 52%,#f6d77a 74%,#b8861a 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(90,55,0,.35),0 2px 4px -1px rgba(0,0,0,.35);
+}
+.chip svg{position:absolute;inset:0;width:100%;height:100%}
+.chip::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 45%,transparent 60%);mix-blend-mode:soft-light}
+.coin{position:absolute;right:10%;top:-4px;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#7a4a00;font-weight:900;background:radial-gradient(circle at 35% 30%,#fff3b0,#fbbf24 55%,#d97706);box-shadow:0 10px 20px -8px #d97706;animation:spin 6s linear infinite;transform-style:preserve-3d}
+@keyframes spin{to{transform:rotateY(360deg)}}
+.spark{position:absolute;color:#fde68a;font-size:14px;animation:twinkle 2.4s ease-in-out infinite}
+.spark.s1{left:6%;top:10px}.spark.s2{right:6%;bottom:90px;animation-delay:.8s}.spark.s3{left:46%;bottom:20px;animation-delay:1.5s;color:#c4b5fd}
+@keyframes twinkle{50%{opacity:.2;transform:scale(.6) rotate(45deg)}}
+.live{position:absolute;right:6%;bottom:40px;display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:14px;background:var(--glass);border:1px solid var(--line-2);backdrop-filter:blur(10px);font-weight:700;font-size:13px;animation:pop .8s var(--ease-back) .7s both}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--mint)}
+.typing{display:inline-flex;gap:3px}
+.typing span{width:4px;height:4px;border-radius:50%;background:var(--ink-3);animation:typing 1.2s ease-in-out infinite}
+.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+@keyframes typing{30%{transform:translateY(-4px);background:var(--ink)}}
+
+/* 品牌字标（替代第三方 Logo） */
+.mono{
+  --s:44px;width:var(--s);height:var(--s);border-radius:calc(var(--s) * .3);flex:none;display:inline-grid;place-items:center;position:relative;
+  background:var(--tile);color:var(--tile-ink,#fff);font-weight:900;font-size:calc(var(--s) * .34);letter-spacing:-.02em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -3px 0 rgba(0,0,0,.16),0 6px 12px -6px rgba(10,4,30,.5);
+  vertical-align:middle;
+}
+.mono::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(160deg,rgba(255,255,255,.38),transparent 46%);pointer-events:none}
+.mono img,.mono .glyph{position:relative;z-index:1;width:56%;height:56%;object-fit:contain;display:block}
+.mono .glyph{filter:drop-shadow(0 1px 1px rgba(0,0,0,.18))}
+.mono img + .glyph,.mono img + .glyph + .mono-txt,.mono .glyph + .mono-txt{display:none}
+
+/* ============ 货架 ============ */
+.shelf{padding:26px 0 10px;scroll-margin-top:70px}
+.shelf-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.shelf-head h2{margin:0;font-size:26px;font-weight:900}
+.shelf-head p{margin:4px 0 0;color:var(--ink-3)}
+.tabs{position:relative;display:flex;gap:4px;padding:5px;border-radius:16px;background:var(--card);border:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{position:relative;z-index:1;display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:12px;font-weight:700;color:var(--ink-2);white-space:nowrap;transition:color .2s}
+.tab[aria-pressed="true"]{color:#fff}
+.tab em{font-style:normal;font-size:11px;padding:0 6px;border-radius:999px;background:rgba(255,255,255,.1)}
+.tab-blob{position:absolute;z-index:0;top:5px;bottom:5px;left:0;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#db2777);box-shadow:0 6px 18px -8px #db2777;transition:transform .45s var(--ease-back),width .45s var(--ease-back)}
+
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;padding:6px 0 20px}
+.sc{
+  --rx:0deg;--ry:0deg;--mx:50%;--my:50%;
+  position:relative;text-align:left;border-radius:var(--radius);padding:7px;
+  background:var(--card);border:1px solid var(--line);
+  transform:perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
+  transition:transform .3s var(--ease-out),border-color .25s,box-shadow .3s;
+  animation:cardIn .55s var(--ease-back) both;animation-delay:calc(var(--i) * 45ms);
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(22px) scale(.97)}}
+.sc:hover{border-color:color-mix(in srgb,var(--a1) 60%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--a1) 22%,transparent),0 24px 50px -26px var(--a1)}
+.sc-face{position:relative;display:block;height:150px;border-radius:16px;padding:16px;overflow:hidden;color:#fff;background:linear-gradient(140deg,var(--a1),var(--a2));box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.sc-glare{position:absolute;inset:0;background:radial-gradient(260px circle at var(--mx) var(--my),rgba(255,255,255,.3),transparent 60%);opacity:0;transition:opacity .25s;pointer-events:none}
+.sc:hover .sc-glare{opacity:1}
+.sc-badge{position:absolute;right:12px;top:12px;padding:3px 10px;border-radius:9px;font-size:12px;font-weight:900;color:#4a2600;background:linear-gradient(180deg,#ffe48a,#fbbf24);box-shadow:0 3px 0 #b45309;transform:rotate(6deg)}
+.sc:hover .sc-badge{animation:wiggle .5s ease}
+@keyframes wiggle{30%{transform:rotate(-6deg) scale(1.08)}60%{transform:rotate(10deg)}}
+.sc-name{position:absolute;left:16px;bottom:32px;font-size:20px;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.2)}
+.sc-delivery{position:absolute;left:16px;bottom:12px;font-size:12px;font-weight:700;opacity:.82}
+.sc-body{display:block;padding:14px 10px 6px}
+.sc-tagline{display:block;font-weight:800;font-size:14px;line-height:1.5;min-height:42px}
+.sc-perk{display:flex;gap:6px;margin-top:8px;color:var(--ink-2);font-size:13px;line-height:1.5}
+.sc-perk .icon{width:15px;height:15px;margin-top:2px;color:var(--a-ink)}
+.sc-foot{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.price b{font-size:28px;font-weight:900;letter-spacing:-.02em}
+.price em{font-style:normal;font-weight:900;color:var(--gold);font-size:14px;margin-left:2px}
+.price small{color:var(--ink-3);font-size:12px;margin-left:4px}
+/* 未标价商品：“联系客服”价签 */
+.price b.ask,.plan .ask{font-size:20px;font-weight:900;letter-spacing:.02em;background:linear-gradient(90deg,var(--cta-1),var(--cta-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.bar .price b.ask{font-size:28px}
+.plan .ask{font-size:18px}
+.holo-price .ask-sm{font-size:14px;margin:0;letter-spacing:.04em}
+.sc-go{display:inline-flex;align-items:center;gap:4px;padding:7px 13px;border-radius:11px;font-weight:900;font-size:13px;color:#fff;background:linear-gradient(180deg,var(--a1),var(--a2));box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 3px 0 color-mix(in srgb,var(--a2) 70%,#000);transition:transform .2s var(--ease-out)}
+.sc-go .icon{width:14px;height:14px;transition:transform .2s}
+.sc:hover .sc-go .icon{transform:translateX(3px)}
+.empty{grid-column:1/-1;text-align:center;padding:50px 0;color:var(--ink-3)}
+
+/* ============ FAQ ============ */
+.faq{padding:30px 0 20px}
+.faq h2{font-size:24px;font-weight:900;margin:0 0 16px}
+.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.faq details{border-radius:16px;background:var(--card);border:1px solid var(--line);transition:background .2s,border-color .2s}
+.faq details[open]{background:var(--card-2);border-color:var(--line-2)}
+.faq summary{list-style:none;display:flex;align-items:center;gap:10px;padding:16px;font-weight:800;cursor:pointer}
+.faq summary::-webkit-details-marker{display:none}
+.faq .q{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:900;background:linear-gradient(135deg,#8b5cf6,#ec4899)}
+.faq summary .icon{margin-left:auto;color:var(--ink-3);transition:transform .3s var(--ease-out)}
+.faq details[open] summary .icon{transform:rotate(180deg)}
+.faq details p{margin:0;padding:0 16px 16px 50px;color:var(--ink-2);animation:fade .3s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(-4px)}}
+
+footer{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:26px 20px 40px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--ink-3);font-size:13px;border-top:1px solid var(--line);align-items: center;}
+footer a{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--ink-2)}
+footer a:hover{color:var(--ink)}
+
+/* ============ 详情弹窗 ============ */
+.mask{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:24px;background:rgba(6,4,16,.7);backdrop-filter:blur(8px);animation:maskIn .22s ease both}
+/* 遮罩只做透明度，不带位移 */
+@keyframes maskIn{from{opacity:0}}
+.mask.closing{animation:fadeOut .2s ease forwards}
+@keyframes fadeOut{to{opacity:0}}
+.sheet{
+  position:relative;width:min(1080px,100%);max-height:min(860px,calc(100vh - 48px));display:grid;grid-template-columns:400px 1fr;grid-template-rows:minmax(0,1fr);
+  border-radius:28px;overflow:hidden;background:var(--sheet);border:1px solid var(--line-2);box-shadow:0 40px 90px -30px rgba(0,0,0,.85);
+  animation:sheetIn .42s var(--ease-back) both;
+}
+.mask.closing .sheet{animation:sheetOut .2s ease forwards}
+@keyframes sheetIn{from{opacity:0;transform:translateY(30px) scale(.96)}}
+@keyframes sheetOut{to{opacity:0;transform:translateY(16px) scale(.97)}}
+.close{position:absolute;right:16px;top:16px;z-index:3;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:1px solid var(--line-2);transition:transform .25s var(--ease-out),background .2s}
+.close:hover{transform:rotate(90deg);background:var(--card-2)}
+.side{padding:44px 34px;overflow:auto;background:radial-gradient(420px 300px at 50% 0,color-mix(in srgb,var(--a1) 28%,transparent),transparent 70%),rgba(255,255,255,.02);border-right:1px solid var(--line)}
+.flip-stage{perspective:1000px;margin-bottom:34px;position:relative}
+.big-card{position:relative;height:200px;border-radius:22px;padding:22px;color:#fff;overflow:hidden;background:linear-gradient(140deg,var(--a1),var(--a2));box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 30px 40px -24px rgba(0,0,0,.8);animation:flipIn 1s var(--ease-out) both,hover 7s ease-in-out 1s infinite}
+@keyframes flipIn{from{transform:rotateY(-80deg) rotateX(10deg);opacity:0}}
+@keyframes hover{50%{transform:translateY(-8px) rotate(-1deg)}}
+.big-card .sheen{position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.35) 50%,transparent 60%);animation:sheen 4.5s ease-in-out 1s infinite}
+@keyframes sheen{from{transform:translateX(-60%)}40%,to{transform:translateX(60%)}}
+.big-card strong{position:absolute;left:22px;bottom:40px;font-size:26px;font-weight:900}
+.big-card small{position:absolute;left:22px;bottom:16px;opacity:.85}
+.big-card .holo-price{right:20px;top:20px}
+.flip-shadow{display:block;height:24px;margin:10px 30px 0;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.6),transparent);animation:shadow 7s ease-in-out 1s infinite}
+@keyframes shadow{50%{transform:scaleX(.86);opacity:.6}}
+.flow-title{display:flex;align-items:center;gap:8px;font-weight:900;margin:0 0 14px}
+.flow-title .icon{color:var(--a-ink)}
+.flow{list-style:none;margin:0;padding:0;position:relative}
+.flow li{position:relative;display:flex;gap:14px;padding-bottom:22px;color:var(--ink-2);animation:rise .5s var(--ease-out) both;animation-delay:calc(.35s + var(--i) * .08s)}
+.flow li:not(:last-child)::before{content:"";position:absolute;left:16px;top:34px;bottom:2px;width:2px;background:color-mix(in srgb,var(--a1) 55%,transparent)}
+.flow .no{width:34px;height:34px;border-radius:11px;flex:none;display:grid;place-items:center;font-weight:900;color:#fff;background:linear-gradient(180deg,var(--a1),var(--a2));box-shadow:0 3px 0 color-mix(in srgb,var(--a2) 70%,#000)}
+.flow li span:last-child{padding-top:6px}
+
+.main{display:flex;flex-direction:column;min-height:0}
+.scroll{flex:1;overflow:auto;padding:44px 40px 24px}
+.step{animation:stepIn .32s var(--ease-out) both}
+@keyframes stepIn{from{opacity:0;transform:translateX(18px)}}
+.d-badge{display:inline-block;padding:4px 12px;border-radius:10px;font-weight:900;font-size:13px;color:#4a2600;background:linear-gradient(180deg,#ffe48a,#fbbf24);box-shadow:0 3px 0 #b45309;transform:rotate(-3deg)}
+.d-head h2{margin:14px 0 8px;font-size:34px;font-weight:900}
+.d-head p{margin:0;color:var(--ink-2);font-size:16px}
+.block{margin-top:28px}
+.block h3{margin:0 0 12px;font-size:15px;color:var(--ink-2)}
+.plans{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.plan{position:relative;text-align:left;padding:16px 18px;border-radius:18px;background:var(--card);border:2px solid var(--line-2);transition:border-color .2s,background .2s,transform .2s var(--ease-out),box-shadow .2s}
+.plan:hover{transform:translateY(-2px)}
+.plan[aria-checked="true"]{border-color:var(--a1);background:color-mix(in srgb,var(--a1) 10%,transparent);box-shadow:0 0 0 4px color-mix(in srgb,var(--a1) 18%,transparent)}
+.plan b{display:block;font-size:16px}
+.plan small{display:block;color:var(--ink-3);margin:2px 0 8px}
+.plan .pp{font-size:24px;font-weight:900}
+.plan .pp em{font-style:normal;font-size:12px;color:var(--gold);margin-left:2px}
+.plan .ok{position:absolute;right:12px;top:12px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--a1);color:#fff;transform:scale(0);transition:transform .3s var(--ease-back)}
+.plan[aria-checked="true"] .ok{transform:scale(1)}
+.plan .ok .icon{width:14px;height:14px}
+.perks{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.perks li{display:flex;gap:10px;padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.tick{width:26px;height:26px;border-radius:9px;flex:none;display:grid;place-items:center;background:var(--a1);color:#fff}
+.tick .icon{width:15px;height:15px}
+.fit{display:flex;align-items:center;gap:8px;margin:12px 0 0;color:var(--ink-2)}
+.fit .icon{color:var(--a-ink)}
+.notes{margin:0;padding-left:20px;color:var(--ink-2)}
+.notes li{margin-bottom:6px}
+.notes li::marker{color:var(--a-ink)}
+.warranty{display:flex;gap:8px;align-items:center;margin:12px 0 0;padding:12px 14px;border-radius:14px;color:#a7f3d0;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.24)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 40px;border-top:1px solid var(--line);background:rgba(10,8,23,.6);backdrop-filter:blur(10px)}
+.bar small{display:block;color:var(--ink-3)}
+.bar .price b{font-size:36px}
+.bar .price em{font-size:16px}
+.bar .price b{display:inline-block}
+.bar .price b.bump{animation:bump .35s var(--ease-back)}
+@keyframes bump{40%{transform:scale(1.15)}}
+
+/* ============ 提示条 ============ */
+/* ============ 客服弹窗 ============ */
+/* 单列轨道限制为视口宽度，避免内部宽图把弹窗撑出屏幕 */
+.support-mask{z-index:60;grid-template-columns:minmax(0,1fr);justify-items:center}
+.support{
+  position:relative;width:min(820px,100%);max-height:calc(100vh - 48px);overflow:auto;padding:28px 28px 24px;
+  border-radius:24px;background:var(--sheet);border:1px solid var(--line-2);box-shadow:0 40px 90px -30px rgba(0,0,0,.85);
+  animation:sheetIn .38s var(--ease-back) both;
+}
+.support-mask.closing .support{animation:sheetOut .2s ease forwards}
+.support h2{margin:0 52px 6px 0;font-size:22px;font-weight:900}
+.support p{margin:0 0 18px;color:var(--ink-2)}
+.support p b{color:var(--ink)}
+.support-img{border-radius:16px;overflow-x:auto;background:#f6f7fb;scrollbar-width:thin}
+.support img{width:100%;min-width:0;height:auto;display:block;user-select:none}
+.support-hint{display:none;margin:10px 0 0;text-align:center;color:var(--ink-3);font-size:12px}
+/* 窄屏：图片保持可扫码的尺寸，左右滑动查看三个二维码 */
+@media (max-width:620px){
+  .mask.support-mask{align-items:center;padding:12px}
+  .support{padding:22px 16px 16px;border-radius:20px;max-height:calc(100vh - 24px)}
+  .support h2{font-size:19px}
+  .support img{min-width:780px}
+  .support-hint{display:block}
+}
+.toast{position:fixed;left:50%;bottom:28px;z-index:80;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:14px;background:#1e1840;border:1px solid var(--line-2);box-shadow:0 20px 40px -20px #000;font-weight:700;animation:toastIn .35s var(--ease-back) both}
+.toast.out{animation:fadeOut .25s ease forwards}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,16px)}}
+
+/* ============ 响应式 ============ */
+@media (max-width:1080px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .stage{order:-1;height:360px}
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .sheet{grid-template-columns:1fr;grid-template-rows:auto;overflow:auto}
+  .side{border-right:0;border-bottom:1px solid var(--line);padding:36px 24px 10px}
+  .main{min-height:auto}.scroll{overflow:visible;padding:28px 24px}
+  .bar{position:sticky;bottom:0;padding:14px 24px}
+}
+@media (max-width:620px){
+  .grid,.faq-grid,.perks,.promises{grid-template-columns:1fr}
+  .stage{height:300px}
+  .holo{width:220px;height:140px}
+  .holo.h2{left:8%;top:140px}
+  .tag{display:none}
+  .mask{padding:0;align-items:end}
+  .sheet{border-radius:24px 24px 0 0;max-height:94vh}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+  .hl svg path{stroke-dashoffset:0}
+}
+</style>
+</head>
+<body>
+<!-- 渐变描边定义，供标题下划线使用 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs><linearGradient id="ul" x1="0" x2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset=".55" stop-color="#f472b6"/><stop offset="1" stop-color="#fbbf24"/></linearGradient></defs>
+</svg>
+
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<header class="top" id="top">
+  <a class="brand" href="#">
+    <span class="brand-mark" aria-hidden="true">AnyAIGC</span>
+    <b>AI聚合平台</b>
+  </a>
+  <!-- <span class="tag">AI订阅</span> -->
+  <div class="top-actions">
+    <!-- <button type="button" class="btn-violet" data-toast="演示页面：请接入你的登录流程">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
+      登录 / 注册
+    </button> -->
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="hero">
+    <div>
+      <span class="eyebrow"><i></i>全球热门 AI 会员 · 一站开通</span>
+      <h1>
+        <span class="line">开通 AI 会员，</span>
+        <span class="line"><span class="hl">像点奶茶一样简单
+          <svg viewBox="0 0 400 14" preserveAspectRatio="none" aria-hidden="true"><path d="M4 9 C 60 2, 110 13, 170 7 S 290 2, 396 8"/></svg>
+        </span><span class="sh-boba-cup" aria-hidden="true">
+          <svg viewBox="0 0 64 84">
+            <defs>
+              <linearGradient id="boba-tea" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#f3d3a8"/><stop offset=".55" stop-color="#d9a46c"/><stop offset="1" stop-color="#a86b3c"/>
+              </linearGradient>
+              <linearGradient id="boba-lid" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e9ddff"/>
+              </linearGradient>
+              <clipPath id="boba-body"><path d="M13 30h38l-4.6 45.5a4 4 0 0 1-4 3.5H21.6a4 4 0 0 1-4-3.5Z"/></clipPath>
+            </defs>
+            <!-- 吸管 -->
+            <!-- 静态倾斜放在外层 g 的属性上，动画只作用于内层，两者叠加而不是互相覆盖 -->
+            <g transform="rotate(12 38 34)">
+              <rect class="straw" x="35" y="0" width="6" height="34" rx="3" fill="#f472b6"/>
+            </g>
+            <!-- 杯身与奶茶 -->
+            <g clip-path="url(#boba-body)">
+              <rect x="10" y="28" width="44" height="54" fill="url(#boba-tea)"/>
+              <path d="M10 36c8 3 14-3 22 0s14 3 22 0v-8H10Z" fill="#fff4e3" opacity=".55"/>
+              <rect x="16" y="32" width="5" height="40" rx="2.5" fill="#fff" opacity=".28"/>
+              <g fill="#3a2214">
+                <circle class="pearl" cx="22" cy="71" r="3.6" style="--d:0s"/>
+                <circle class="pearl" cx="30" cy="73" r="3.6" style="--d:.3s"/>
+                <circle class="pearl" cx="38.5" cy="71.5" r="3.6" style="--d:.6s"/>
+                <circle class="pearl" cx="26" cy="65" r="3.4" style="--d:.9s"/>
+                <circle class="pearl" cx="35" cy="65.5" r="3.4" style="--d:1.2s"/>
+                <circle class="pearl" cx="43" cy="66" r="3.2" style="--d:.45s"/>
+              </g>
+              <circle class="bubble" cx="29" cy="60" r="1.4" fill="#fff" style="--d:0s"/>
+              <circle class="bubble" cx="39" cy="62" r="1.1" fill="#fff" style="--d:1.4s"/>
+            </g>
+            <path d="M13 30h38l-4.6 45.5a4 4 0 0 1-4 3.5H21.6a4 4 0 0 1-4-3.5Z" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="1.6"/>
+            <!-- 表情 -->
+            <ellipse class="eye" cx="25.5" cy="47" rx="2" ry="2.6" fill="#3a2214"/>
+            <ellipse class="eye" cx="38.5" cy="47" rx="2" ry="2.6" fill="#3a2214"/>
+            <path d="M29 52.5q3 2.6 6 0" fill="none" stroke="#3a2214" stroke-width="1.8" stroke-linecap="round"/>
+            <ellipse cx="21.5" cy="52" rx="2.6" ry="1.6" fill="#f472b6" opacity=".55"/>
+            <ellipse cx="42.5" cy="52" rx="2.6" ry="1.6" fill="#f472b6" opacity=".55"/>
+            <!-- 杯盖 -->
+            <path d="M14 24c3-9 33-9 36 0Z" fill="url(#boba-lid)"/>
+            <rect x="10" y="23" width="44" height="7.5" rx="3.75" fill="url(#boba-lid)" stroke="#c4b5fd" stroke-width="1"/>
+          </svg>
+        </span></span>
+      </h1>
+      <p class="lead">挑选你需要的 AI 服务，联系专属顾问一键开通，进度全程可查。</p>
+      <div class="hero-actions">
+        <button type="button" class="cta" id="browse">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
+          浏览会员
+        </button>
+        <!-- <button type="button" class="ghost" data-toast="暂无订单，下单后可在这里查看进度">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>
+          我的订单
+        </button> -->
+      </div>
+      <ul class="promises" id="promises"></ul>
+    </div>
+
+    <div class="stage" id="stage" aria-hidden="true">
+      <span class="floor"></span>
+      <div class="rig" id="rig"></div>
+      <span class="coin">¥</span>
+      <span class="spark s1">✦</span><span class="spark s2">✦</span><span class="spark s3">✦</span>
+      <span class="live"><i></i>顾问在线<span class="typing"><span></span><span></span><span></span></span></span>
+    </div>
+  </section>
+
+  <section class="shelf" id="shelf" aria-labelledby="shelf-title">
+    <div class="shelf-head">
+      <div>
+        <h2 id="shelf-title">选一张会员卡</h2>
+        <p>价格单位为算力，1 算力 = 1 元</p>
+      </div>
+      <div class="tabs" id="tabs" role="group" aria-label="会员分类"><span class="tab-blob" id="blob"></span></div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="faq" aria-labelledby="faq-title">
+    <h2 id="faq-title">常见问题</h2>
+    <div class="faq-grid" id="faq"></div>
+  </section>
+</main>
+
+<footer>
+  <p>AnyAIGC·AI 订阅服务由人工协助开通，各平台权益以其官方说明为准。</p>
+  <div>
+    <a href="https://anyaigc.ai" target="_blank">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+      大模型API聚合站
+    </a>
+    <a href="#">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+      回到顶部
+    </a>
+
+  </div>
+</footer>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ---------- 图标 ---------- */
+  const ICONS = {
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    arrow: '<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>',
+    x: '<path d="M18 6 6 18"/><path d="M6 6l12 12"/>',
+    route: '<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h3a3 3 0 0 0 3-3V9a3 3 0 0 1 3-3"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/>',
+    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',
+    chat: '<path d="M21 12a8 8 0 0 1-11.8 7L3 21l2-6.2A8 8 0 1 1 21 12Z"/>',
+    refund: '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    down: '<path d="m6 9 6 6 6-6"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/>'
+  };
+  const icon = (name, sw = 1.9) =>
+    `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+
+  // 输出到 innerHTML 前统一转义，防止数据里混入标签
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmt = (n) => n.toLocaleString('zh-CN');
+
+  /* ---------- 数据（示例价格，按你的实际定价替换） ---------- */
+  const DELIVERY = {
+    account: {
+      label: '充值到你的账号',
+      flow: ['联系顾问，核对要开通的账号', '在你的账号上开通会员', '登录确认权益生效即可使用']
+    },
+    invite: {
+      label: '邮箱邀请加入',
+      flow: ['联系顾问，核对要开通的账号', '向你的邮箱发送团队邀请', '接受邀请后即可使用']
+    },
+    ready: {
+      label: '提供独立账号',
+      flow: ['联系顾问，核对要开通的账号', '通过私密渠道交付登录信息', '登录后建议立即修改密码']
+    }
+  };
+
+  const CATS = [
+    { id: 'all', label: '全部' },
+    { id: 'chatgpt', label: 'ChatGPT' },
+    { id: 'claude', label: 'Claude' },
+    { id: 'google', label: 'Google AI' },
+    { id: 'grok', label: 'Grok · X' }
+  ];
+
+  const T = {
+    green: 'linear-gradient(150deg,#22c08e,#0b4a38)',
+    sand: 'linear-gradient(150deg,#fffaf3,#ffd9bf)',
+    white: 'linear-gradient(150deg,#ffffff,#e7ebff)',
+    ink: 'linear-gradient(150deg,#3a3550,#14111f)',
+    teal: 'linear-gradient(150deg,#2dd4bf,#0f5e5a)'
+  };
+
+  const PRODUCTS = [
+    { id: 'gpt-plus', icon: 'assets/openai_bai.svg', cat: 'chatgpt', name: 'ChatGPT Plus', mono: 'GPT', tile: T.green, accent: ['#18b97a', '#0a6e4f'], badge: '人气',
+      delivery: 'account', tagline: '日常学习办公的主力助手，覆盖写作、问答与分析',
+      perks: ['使用高级模型，响应更快、额度更充足', '支持文件上传、图片理解与联网搜索', '可创建和使用自定义 GPT'],
+      fit: '学生、职场人、内容创作者', plans: [{ label: '月卡', term: '1 个月', price: 160 }] },
+    { id: 'gpt-pro', icon: 'assets/openai_bai.svg', cat: 'chatgpt', name: 'ChatGPT Pro', mono: 'GPT', tile: T.green, accent: ['#0f9f6e', '#06281f'], badge: '旗舰',
+      delivery: 'account', tagline: '重度用户的高配方案，额度更高、推理更强',
+      perks: ['数倍于 Plus 的使用额度', '可用更强的推理模型处理复杂任务', '新功能优先体验'],
+      fit: '程序员、研究人员、内容团队等重度用户',
+      plans: [{ label: '5× 档', term: '1 个月', price: 760 }, { label: '20× 档', term: '1 个月', price: 1580 }, { label: '500× 档', term: '1 个月', price: 3380 }] },
+    { id: 'claude-pro', icon: 'assets/claude.svg', cat: 'claude', name: 'Claude Pro', mono: 'C', tile: T.sand, tileInk: '#c2572e', accent: ['#ee9467', '#b94d2b'], badge: '推荐',
+      delivery: 'account', tagline: '擅长长文本与代码，写作和推理表现稳定',
+      perks: ['更高的消息额度与优先访问', '超长上下文，整份文档一次读完', '项目功能整理资料与对话'],
+      fit: '写作者、研究者、开发者', plans: [{ label: '月卡', term: '1 个月', price: null }] },
+    { id: 'claude-max', icon: 'assets/claude.svg', cat: 'claude', name: 'Claude Max', mono: 'C', tile: T.sand, tileInk: '#c2572e', accent: ['#e2744a', '#6e2612'], badge: '高配',
+      delivery: 'account', tagline: '面向重度用户的高额度方案，长时间使用不卡顿',
+      perks: ['数倍于 Pro 的使用额度', '高峰期优先访问', '新功能抢先体验'],
+      fit: '每天高强度使用的专业用户',
+      plans: [{ label: '5× 档', term: '1 个月', price: null }, { label: '20× 档', term: '1 个月', price: null }] },
+    { id: 'google-pro', icon: 'assets/gemini.svg', cat: 'google', name: 'Google AI Pro', mono: 'G', tile: T.white, tileInk: '#4f46e5', accent: ['#7c8cf8', '#5b3fd6'], badge: '超值',
+      delivery: 'account', tagline: 'Gemini 高级会员，附带大容量云端存储',
+      perks: ['使用 Gemini 高级模型与深度研究', '与文档、邮箱等办公工具联动', '附赠大容量云存储空间'],
+      fit: '重度办公与资料整理用户', plans: [{ label: '月卡', term: '1 个月', price: null }] },
+    { id: 'google-ultra', icon: 'assets/gemini.svg', cat: 'google', name: 'Google AI Ultra', mono: 'G', tile: T.white, tileInk: '#4f46e5', accent: ['#8b7cf6', '#3b2a9e'], badge: '顶配',
+      delivery: 'account', tagline: 'Google 顶配会员，最强模型与最高额度',
+      perks: ['最高级别的 Gemini 模型与额度', '视频生成与创作工具额度更高', '更大的云存储空间'],
+      fit: '创作者与专业团队', plans: [{ label: '月卡', term: '1 个月', price: null }] },
+    { id: 'supergrok', icon: 'assets/Grok_bai.svg', cat: 'grok', name: 'SuperGrok', mono: 'G', tile: T.ink, accent: ['#6b7280', '#1f2230'], accentInk: '#cbd5e1', badge: '实时',
+      delivery: 'account', tagline: '实时资讯与热点追踪，回答风格直接',
+      perks: ['更高的对话与生图额度', '实时获取社交平台热点', '深度思考与搜索模式'],
+      fit: '关注热点资讯的用户', plans: [{ label: '月卡', term: '1 个月', price: null }] },
+    { id: 'x-premium', icon: 'assets/x.svg', cat: 'grok', name: 'X Premium', mono: 'X', tile: T.white, accent: ['#4b5563', '#111318'], accentInk: '#cbd5e1', badge: '',
+      delivery: 'account', tagline: 'X 平台会员，发帖、编辑与创作者功能全开',
+      perks: ['认证标识，回复优先展示', '发长文、编辑已发帖子', '更少广告干扰'],
+      fit: '经常使用 X 的用户', plans: [{ label: '月卡', term: '1 个月', price: null }] },
+    { id: 'x-premium-plus', icon: 'assets/x.svg', cat: 'grok', name: 'X Premium+', mono: 'X', tile: T.white, accent: ['#374151', '#05060a'], accentInk: '#cbd5e1', badge: '含 Grok',
+      delivery: 'account', tagline: 'X 最高档会员，无广告浏览并附带 Grok 权益',
+      perks: ['Premium 全部权益', '浏览时间线无广告', '附带更高的 Grok 使用额度'],
+      fit: 'X 重度用户与内容创作者', plans: [{ label: '月卡', term: '1 个月', price: null }] }
+  ];
+
+  const NOTES = {
+    account: ['请准备好可正常登录的账号，建议使用自己长期在用的账号', '当前会员未到期时，建议到期后再下单', '使用相关服务需自备可正常访问的网络环境'],
+    invite: ['请提供可正常收信的邮箱，用于接收团队邀请', '席位归属团队空间，请勿在其中存放敏感资料', '使用相关服务需自备可正常访问的网络环境'],
+    ready: ['交付的是独立账号，收到后请尽快修改密码', '请勿在多台陌生设备上频繁登录，以免触发风控', '使用相关服务需自备可正常访问的网络环境']
+  };
+
+  const PROMISES = [
+    { t: '正规渠道开通', s: '权益与官方会员一致', ic: 'shield', g: 'linear-gradient(135deg,#a78bfa,#7c3aed)' },
+    { t: '专属顾问跟进', s: '下单后主动联系你', ic: 'chat', g: 'linear-gradient(135deg,#34d399,#0d9488)' },
+    { t: '开通失败全退', s: '算力原路退回账户', ic: 'refund', g: 'linear-gradient(135deg,#fbbf24,#f97316)' },
+    { t: '质保期内可售后', s: '异常按剩余天数处理', ic: 'clock', g: 'linear-gradient(135deg,#60a5fa,#6366f1)' }
+  ];
+
+  const FAQ = [
+    { q: '怎么付款？', a: '联系客服下单，1 算力 = 1 元。' },
+    { q: '下单后多久能开通？', a: '工作时间内通常几分钟就会有顾问联系你，具体开通时长取决于平台和交付方式。' },
+    { q: '开通不了怎么办？', a: '如果因渠道或账号原因无法开通，订单会被取消，本单算力全额退回。' },
+    { q: '活动赠送的算力能用吗？', a: '可以用，赠送算力仅限活动期间使用。' }
+  ];
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s, el = document) => el.querySelector(s);
+
+  /* 内置示意图标：商品没有 icon 字段，或 icon 文件加载失败时使用 */
+  const GLYPHS = {
+    chat: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5Z"/><path d="M8.5 9.5h.01M12 9.5h.01M15.5 9.5h.01" stroke-width="3"/>',
+    team: '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.5"/><path d="M15.8 14.2c2.3.2 4 1.8 4.6 4.8"/>',
+    quill: '<path d="M20 4c-6.5.5-11 4.6-12.6 11.4L6 20"/><path d="M20 4c-.4 5.4-3.5 9.4-9.6 10.6"/><path d="M8.6 12.6 12 13"/>',
+    bolt: '<path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12Z"/>',
+    sparkle: '<path d="M12 2.5c.7 4.9 4.6 8.8 9.5 9.5-4.9.7-8.8 4.6-9.5 9.5-.7-4.9-4.6-8.8-9.5-9.5 4.9-.7 8.8-4.6 9.5-9.5Z"/>',
+    pulse: '<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>',
+    search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/><path d="M8 10.5h5M10.5 8v5"/>',
+    brush: '<path d="M18.5 3.5a2 2 0 0 1 2.8 2.8l-8.6 8.6-2.8-2.8Z"/><path d="M9.2 13.4c-2.6-.4-4.7 1.4-4.7 4 0 1.3-.7 2.2-2 2.6 3.6 1.3 7.9.5 8.4-3.1"/>',
+  };
+  const PRODUCT_GLYPH = {
+    'gpt-plus': 'chat', 'gpt-pro': 'bolt', 'claude-pro': 'quill', 'claude-max': 'bolt',
+    'google-pro': 'sparkle', 'google-ultra': 'sparkle', supergrok: 'pulse', 'x-premium': 'pulse', 'x-premium-plus': 'pulse'
+  };
+  const glyphSVG = (name) => GLYPHS[name]
+    ? `<svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">${GLYPHS[name]}</svg>`
+    : '';
+
+  // 显示优先级：官方图标文件 > 内置示意图标 > 文字字标；图标文件加载失败时自动退回
+  const monoHTML = (p, size = 44) =>
+    `<span class="mono" style="--s:${size}px;--tile:${p.tile};${p.tileInk ? `--tile-ink:${p.tileInk}` : ''}" aria-hidden="true">` +
+    (p.icon ? `<img src="${esc(p.icon)}" alt="" draggable="false" onerror="this.remove()">` : '') +
+    glyphSVG(PRODUCT_GLYPH[p.id]) +
+    `<span class="mono-txt">${esc(p.mono)}</span></span>`;
+
+  // 银行卡芯片：触点分区线
+  const CHIP = '<span class="chip" aria-hidden="true"><svg viewBox="0 0 38 28" fill="none" stroke="rgba(110,70,0,.55)" stroke-width="1">' +
+    '<path d="M0 9.5h11M0 18.5h11M27 9.5h11M27 18.5h11"/>' +
+    '<rect x="11" y="5" width="16" height="18" rx="4"/>' +
+    '<path d="M19 0v5M19 23v5M11 14h16"/></svg></span>';
+  // --a-ink：深色背景上的文字/小图标色。主题色太暗（如 X、Grok）时用 accentInk 单独指定
+  const accentStyle = (p) => `--a1:${p.accent[0]};--a2:${p.accent[1]};--a-ink:${p.accentInk || p.accent[0]}`;
+  const ASK = '联系客服';
+  const hasPrice = (pl) => typeof pl.price === 'number';
+  // 有标价的规格取最低价；全部未标价返回 null
+  const minPrice = (p) => {
+    const xs = p.plans.filter(hasPrice).map((x) => x.price);
+    return xs.length ? Math.min(...xs) : null;
+  };
+  const priceLabel = (p) => (minPrice(p) == null ? ASK : `${fmt(minPrice(p))} 算力${p.plans.length > 1 ? '起' : ''}`);
+  // 卡片角上的小价签
+  const tagHTML = (n) => (n == null ? '<b class="ask-sm">询价</b>' : `<b>${fmt(n)}</b>算力`);
+  // 大号价格：卡片底部 / 弹窗底栏
+  const bigPriceHTML = (n, key = '') =>
+    n == null ? `<b class="ask"${key}>${ASK}</b>` : `<b${key}>${fmt(n)}</b><em>算力</em>`;
+
+  /* ---------- 提示条 ---------- */
+  let toastTimer;
+  function toast(msg) {
+    document.querySelector('.toast')?.remove();
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.setAttribute('role', 'status');
+    el.innerHTML = `${icon('info')}<span>${esc(msg)}</span>`;
+    document.body.appendChild(el);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 260); }, 2400);
+  }
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-toast]');
+    if (t) toast(t.dataset.toast);
+  });
+
+  /* ---------- 顶栏滚动态 ---------- */
+  const top = $('#top');
+  const onScroll = () => top.classList.toggle('raised', window.scrollY > 8);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ---------- Hero ---------- */
+  $('#promises').innerHTML = PROMISES.map((p, i) => `
+    <li style="--i:${i}">
+      <span class="pi" style="--g:${p.g}">${icon(p.ic)}</span>
+      <span><b>${esc(p.t)}</b><small>${esc(p.s)}</small></span>
+    </li>`).join('');
+
+  const featured = ['google-pro', 'claude-pro', 'gpt-plus'].map((id) => PRODUCTS.find((p) => p.id === id));
+  $('#rig').innerHTML = featured.map((p, i) => `
+    <button type="button" class="holo h${i}" tabindex="-1" data-open="${p.id}" style="${accentStyle(p)}">
+      <span class="wrap">
+        <span class="dots"></span>
+        ${monoHTML(p, 46)}${CHIP}
+        <span class="holo-price">${tagHTML(minPrice(p))}</span>
+        <strong>${esc(p.name)}</strong>
+        <small>${esc(p.plans[0].term)}</small>
+      </span>
+    </button>`).join('');
+
+  // 舞台视差：指针在 Hero 区内移动时整组卡片跟随偏转
+  const stage = $('#stage');
+  $('#hero').addEventListener('pointermove', (e) => {
+    if (reduceMotion || e.pointerType === 'touch') return;
+    const r = stage.getBoundingClientRect();
+    const x = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    const y = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+    stage.style.setProperty('--px', `${((x - 0.5) * 16).toFixed(2)}deg`);
+    stage.style.setProperty('--py', `${((0.5 - y) * 10).toFixed(2)}deg`);
+  });
+  $('#hero').addEventListener('pointerleave', () => {
+    stage.style.removeProperty('--px');
+    stage.style.removeProperty('--py');
+  });
+
+  $('#browse').addEventListener('click', () => $('#shelf').scrollIntoView({ block: 'start' }));
+
+  /* ---------- 分类 + 网格 ---------- */
+  let current = 'all';
+  const tabs = $('#tabs');
+  const blob = $('#blob');
+  tabs.insertAdjacentHTML('beforeend', CATS.map((c) => {
+    const n = c.id === 'all' ? PRODUCTS.length : PRODUCTS.filter((p) => p.cat === c.id).length;
+    return n ? `<button type="button" class="tab" data-cat="${c.id}" aria-pressed="${c.id === current}">${esc(c.label)}<em>${n}</em></button>` : '';
+  }).join(''));
+
+  function moveBlob() {
+    const btn = tabs.querySelector(`[data-cat="${current}"]`);
+    if (!btn) return;
+    blob.style.width = `${btn.offsetWidth}px`;
+    blob.style.transform = `translateX(${btn.offsetLeft}px)`;
+  }
+
+  function renderGrid() {
+    const list = current === 'all' ? PRODUCTS : PRODUCTS.filter((p) => p.cat === current);
+    $('#grid').innerHTML = list.length ? list.map((p, i) => {
+      const multi = p.plans.length > 1;
+      return `
+      <button type="button" class="sc" data-open="${p.id}" style="${accentStyle(p)};--i:${i}" aria-label="${esc(p.name)}，${priceLabel(p)}">
+        <span class="sc-face">
+          <span class="sc-glare"></span>
+          <span class="dots"></span>
+          ${monoHTML(p)}${CHIP}
+          ${p.badge ? `<span class="sc-badge">${esc(p.badge)}</span>` : ''}
+          <strong class="sc-name">${esc(p.name)}</strong>
+          <small class="sc-delivery">${esc(DELIVERY[p.delivery].label)}</small>
+        </span>
+        <span class="sc-body">
+          <span class="sc-tagline">${esc(p.tagline)}</span>
+          ${p.perks.slice(0, 2).map((t) => `<span class="sc-perk">${icon('check', 2.4)}${esc(t)}</span>`).join('')}
+          <span class="sc-foot">
+            <span class="price">${bigPriceHTML(minPrice(p))}${minPrice(p) == null ? '' : `<small>${multi ? '起' : '/ ' + esc(p.plans[0].term)}</small>`}</span>
+            ${minPrice(p) == null
+              ? `<span class="sc-go" data-ask="${p.id}" title="联系客服询价">咨询${icon('arrow', 2.2)}</span>`
+              : `<span class="sc-go">开通${icon('arrow', 2.2)}</span>`}
+          </span>
+        </span>
+      </button>`;
+    }).join('') : '<p class="empty">该分类暂无商品</p>';
+  }
+
+  tabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab');
+    if (!btn || btn.dataset.cat === current) return;
+    current = btn.dataset.cat;
+    tabs.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+    moveBlob();
+    btn.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+    renderGrid();
+  });
+  window.addEventListener('resize', moveBlob);
+  renderGrid();
+  // 字体加载完成后宽度会变化，再校准一次滑块
+  (document.fonts?.ready || Promise.resolve()).then(moveBlob);
+  moveBlob();
+
+  // 卡片倾斜 + 高光跟随（事件委托，网格重绘后依然有效）
+  const grid = $('#grid');
+  grid.addEventListener('pointermove', (e) => {
+    const card = e.target.closest('.sc');
+    if (!card || e.pointerType === 'touch') return;
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    const k = reduceMotion ? 3 : 10;
+    card.style.setProperty('--rx', `${((0.5 - y) * k).toFixed(2)}deg`);
+    card.style.setProperty('--ry', `${((x - 0.5) * k).toFixed(2)}deg`);
+    card.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
+    card.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
+  });
+  grid.addEventListener('pointerout', (e) => {
+    const card = e.target.closest('.sc');
+    if (card && !card.contains(e.relatedTarget)) ['--rx', '--ry', '--mx', '--my'].forEach((v) => card.style.removeProperty(v));
+  });
+
+  /* ---------- FAQ ---------- */
+  $('#faq').innerHTML = FAQ.map((f) => `
+    <details>
+      <summary><span class="q" aria-hidden="true">Q</span><span>${esc(f.q)}</span>${icon('down')}</summary>
+      <p>${esc(f.a)}</p>
+    </details>`).join('');
+
+  /* ---------- 详情弹窗 ---------- */
+  let lastFocus = null;
+  let mask = null;
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-open]');
+    if (t) openSheet(PRODUCTS.find((p) => p.id === t.dataset.open));
+  });
+
+  function openSheet(p) {
+    if (!p || mask) return;
+    lastFocus = document.activeElement;
+    let sel = 0;
+    const d = DELIVERY[p.delivery];
+
+    mask = document.createElement('div');
+    mask.className = 'mask';
+    mask.innerHTML = `
+      <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sd-title" tabindex="-1" style="${accentStyle(p)}">
+        <button type="button" class="close" aria-label="关闭">${icon('x')}</button>
+        <aside class="side">
+          <div class="flip-stage">
+            <div class="big-card">
+              <span class="dots"></span>
+              ${monoHTML(p, 54)}${CHIP}
+              <span class="holo-price" data-k="card-price">${tagHTML(p.plans[0].price)}</span>
+              <strong>${esc(p.name)}</strong>
+              <small data-k="card-plan">${esc(p.plans[0].label)} · ${esc(p.plans[0].term)}</small>
+              <i class="sheen"></i>
+            </div>
+            <span class="flip-shadow"></span>
+          </div>
+          <p class="flow-title">${icon('route')}开通流程 · ${esc(d.label)}</p>
+          <ol class="flow">
+            ${d.flow.map((t, i) => `<li style="--i:${i}"><span class="no">${i + 1}</span><span>${esc(t)}</span></li>`).join('')}
+          </ol>
+        </aside>
+        <div class="main">
+          <div class="scroll">
+            <div class="step">
+              <header class="d-head">
+                ${p.badge ? `<span class="d-badge">${esc(p.badge)}</span>` : ''}
+                <h2 id="sd-title">${esc(p.name)}</h2>
+                <p>${esc(p.tagline)}</p>
+              </header>
+              <section class="block">
+                <h3 id="sd-plans">选择规格</h3>
+                <div class="plans" role="radiogroup" aria-labelledby="sd-plans">
+                  ${p.plans.map((pl, i) => `
+                    <button type="button" class="plan" role="radio" aria-checked="${i === 0}" tabindex="${i === 0 ? 0 : -1}" data-i="${i}">
+                      <b>${esc(pl.label)}</b><small>${esc(pl.term)}</small>
+                      <span class="pp">${hasPrice(pl) ? `${fmt(pl.price)}<em>算力</em>` : `<span class="ask">${ASK}</span>`}</span>
+                      <span class="ok">${icon('check', 2.6)}</span>
+                    </button>`).join('')}
+                </div>
+              </section>
+              <section class="block">
+                <h3>会员权益</h3>
+                <ul class="perks">
+                  ${p.perks.map((t) => `<li><span class="tick">${icon('check', 2.6)}</span>${esc(t)}</li>`).join('')}
+                </ul>
+                <p class="fit">${icon('users')}<span>适合：${esc(p.fit)}</span></p>
+              </section>
+              <section class="block">
+                <h3>购买须知</h3>
+                <ul class="notes">${NOTES[p.delivery].map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+                <p class="warranty">${icon('shield')}<span>质保期内出现权益异常，可联系顾问按剩余天数处理。</span></p>
+              </section>
+            </div>
+          </div>
+          <div class="bar">
+            <div>
+              <small data-k="bar-plan">${esc(p.plans[0].label)} · ${esc(p.plans[0].term)}</small>
+              <span class="price" data-k="bar-price">${bigPriceHTML(p.plans[0].price)}</span>
+            </div>
+            <button type="button" class="cta" data-k="buy">${hasPrice(p.plans[0]) ? '立即开通' : '联系客服'}${icon('arrow', 2.2)}</button>
+          </div>
+        </div>
+      </section>`;
+    document.body.appendChild(mask);
+    document.documentElement.classList.add('locked');
+
+    const sheet = $('.sheet', mask);
+    const plans = [...mask.querySelectorAll('.plan')];
+    sheet.focus();
+
+    function choose(i) {
+      sel = i;
+      const pl = p.plans[i];
+      plans.forEach((b, j) => { b.setAttribute('aria-checked', String(j === i)); b.tabIndex = j === i ? 0 : -1; });
+      const text = `${pl.label} · ${pl.term}`;
+      $('[data-k="card-plan"]', mask).textContent = text;
+      $('[data-k="bar-plan"]', mask).textContent = text;
+      $('[data-k="card-price"]', mask).innerHTML = tagHTML(pl.price);
+      $('[data-k="bar-price"]', mask).innerHTML = bigPriceHTML(pl.price);
+      const buy = $('[data-k="buy"]', mask);
+      buy.firstChild.textContent = hasPrice(pl) ? '立即开通' : '联系客服';
+      const bp = $('[data-k="bar-price"] b', mask);
+      bp.classList.remove('bump'); void bp.offsetWidth; bp.classList.add('bump');
+    }
+
+    mask.addEventListener('click', (e) => {
+      if (e.target === mask || e.target.closest('.close')) return closeSheet();
+      const plan = e.target.closest('.plan');
+      if (plan) return choose(Number(plan.dataset.i));
+      if (e.target.closest('[data-k="buy"]')) {
+        const pl = p.plans[sel];
+        if (hasPrice(pl)) toast(`演示页面：已选择 ${p.name} · ${pl.label}，请接入你的下单流程`);
+        else openSupport(`${p.name} · ${pl.label}`);
+      }
+    });
+
+    mask.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') return closeSheet();
+      // 单选组方向键切换
+      if (e.target.classList.contains('plan') && /^Arrow/.test(e.key)) {
+        e.preventDefault();
+        const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1;
+        const n = (sel + step + plans.length) % plans.length;
+        choose(n); plans[n].focus();
+      }
+      // 焦点限制在弹窗内
+      if (e.key === 'Tab') {
+        const f = [...sheet.querySelectorAll('button:not([tabindex="-1"]),[href]')];
+        const first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && (document.activeElement === first || document.activeElement === sheet)) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+  }
+
+  function closeSheet() {
+    if (!mask) return;
+    const m = mask;
+    mask = null;
+    m.classList.add('closing');
+    const done = () => { m.remove(); document.documentElement.classList.remove('locked'); lastFocus?.focus?.({ preventScroll: true }); };
+    reduceMotion ? done() : setTimeout(done, 200);
+  }
+
+  /* ---------- 客服联系方式 ---------- */
+  const SUPPORT_IMG = 'assets/support.png';
+  let support = null;
+
+  // 叠在详情弹窗之上；关闭后焦点回到触发按钮
+  function openSupport(subject) {
+    if (support) return;
+    const opener = document.activeElement;
+    support = document.createElement('div');
+    support.className = 'mask support-mask';
+    support.innerHTML = `
+      <section class="support" role="dialog" aria-modal="true" aria-labelledby="sp-title" tabindex="-1">
+        <button type="button" class="close" aria-label="关闭">${icon('x')}</button>
+        <h2 id="sp-title">联系客服询价</h2>
+        <p>${subject ? `咨询商品：<b>${esc(subject)}</b>，` : ''}扫码或搜索账号添加任一客服，告诉客服你想开通的会员即可。</p>
+        <div class="support-img" tabindex="0" aria-label="客服二维码，可左右滑动查看">
+          <img src="${SUPPORT_IMG}" alt="客服联系方式：微信 AmazingRobin，QQ 225144555，Telegram @anyaigc" draggable="false">
+        </div>
+        <p class="support-hint">← 左右滑动查看微信 / QQ / TG 客服 →</p>
+      </section>`;
+    document.body.appendChild(support);
+    document.documentElement.classList.add('locked');
+
+    const m = support;
+    const box = $('.support', m);
+    box.focus();
+    const close = () => {
+      if (support !== m) return;
+      support = null;
+      m.classList.add('closing');
+      const done = () => {
+        m.remove();
+        if (!mask) document.documentElement.classList.remove('locked');
+        opener?.focus?.({ preventScroll: true });
+      };
+      reduceMotion ? done() : setTimeout(done, 200);
+    };
+    m.addEventListener('click', (e) => {
+      if (e.target === m || e.target.closest('.close')) close();
+    });
+    m.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.stopPropagation(); close(); }
+      // 焦点在关闭按钮和图片滚动区之间循环
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const f = [$('.close', m), $('.support-img', m)];
+        const i = f.indexOf(document.activeElement);
+        f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
+      }
+    });
+  }
+
+  // 网格卡片上的“咨询”按钮：直接弹客服，不打开详情
+  document.addEventListener('click', (e) => {
+    const ask = e.target.closest('[data-ask]');
+    if (!ask) return;
+    e.stopImmediatePropagation();
+    const p = PRODUCTS.find((x) => x.id === ask.dataset.ask);
+    openSupport(p?.name);
+  }, true);
+})();
+</script>
+</body>
+</html>
