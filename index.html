@@ -784,7 +784,7 @@ footer a:hover{color:var(--ink)}
           <span class="sc-perk"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>使用高级模型，响应更快、额度更充足</span><span class="sc-perk"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>支持文件上传、图片理解与联网搜索</span>
           <span class="sc-foot">
             <span class="price"><b>160</b><em>算力</em><small>/ 1 个月</small></span>
-            <span class="sc-go">开通<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span>
+            <span class="sc-go" data-ask="gpt-plus" title="联系客服开通">开通<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span>
           </span>
         </span>
       </button>
@@ -802,7 +802,7 @@ footer a:hover{color:var(--ink)}
           <span class="sc-perk"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>数倍于 Plus 的使用额度</span><span class="sc-perk"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>可用更强的推理模型处理复杂任务</span>
           <span class="sc-foot">
             <span class="price"><b>760</b><em>算力</em><small>起</small></span>
-            <span class="sc-go">开通<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span>
+            <span class="sc-go" data-ask="gpt-pro" title="联系客服开通">开通<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span>
           </span>
         </span>
       </button>
@@ -1242,7 +1242,7 @@ footer a:hover{color:var(--ink)}
             <span class="price">${bigPriceHTML(minPrice(p))}${minPrice(p) == null ? '' : `<small>${multi ? '起' : '/ ' + esc(p.plans[0].term)}</small>`}</span>
             ${minPrice(p) == null
               ? `<span class="sc-go" data-ask="${p.id}" title="联系客服询价">咨询${icon('arrow', 2.2)}</span>`
-              : `<span class="sc-go">开通${icon('arrow', 2.2)}</span>`}
+              : `<span class="sc-go" data-ask="${p.id}" title="联系客服开通">开通${icon('arrow', 2.2)}</span>`}
           </span>
         </span>
       </button>`;
@@ -1396,9 +1396,9 @@ footer a:hover{color:var(--ink)}
       const plan = e.target.closest('.plan');
       if (plan) return choose(Number(plan.dataset.i));
       if (e.target.closest('[data-k="buy"]')) {
+        // 有价无价都走人工下单，弹客服并带上所选规格
         const pl = p.plans[sel];
-        if (hasPrice(pl)) toast(`演示页面：已选择 ${p.name} · ${pl.label}，请接入你的下单流程`);
-        else openSupport(`${p.name} · ${pl.label}`);
+        openSupport(`${p.name} · ${pl.label}`);
       }
     });
 
